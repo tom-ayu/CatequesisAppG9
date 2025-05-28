@@ -2,13 +2,16 @@
 {% block title %}Listado de Catequizados{% endblock %}
 {% block content %}
 <h2>Listado de Catequizados</h2>
+
+{% if catequizados %}
 <table>
   <thead>
     <tr>
       <th>Nombre</th>
       <th>Apellido</th>
       <th>Teléfono</th>
-      <th>Fecha de Nacimiento</th>
+      <th>Fecha Nacimiento</th>
+      <th>ID Bautismo</th>
       <th>Acciones</th>
     </tr>
   </thead>
@@ -19,6 +22,7 @@
       <td>{{ c.Apellido }}</td>
       <td>{{ c.Telefono }}</td>
       <td>{{ c.FechaNacimiento }}</td>
+      <td>{{ c.IdBautismo }}</td>
       <td>
         <a class="btn edit" href="{{ url_for('edit', id=c.IdCatequizado) }}">Editar</a>
         <a class="btn delete" href="{{ url_for('delete', id=c.IdCatequizado) }}" onclick="return confirm('¿Eliminar este catequizado?')">Eliminar</a>
@@ -27,4 +31,8 @@
     {% endfor %}
   </tbody>
 </table>
+{% else %}
+  <p>No hay catequizados registrados aún.</p>
+{% endif %}
+
 {% endblock %}

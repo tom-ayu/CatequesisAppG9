@@ -8,7 +8,7 @@
 <body>
   <header>
     <div class="container">
-      <h1>📘 Plataforma Catequética</h1>
+      <h1>Plataforma de Registro de Catequizandos</h1>
       <nav>
         <a href="{{ url_for('index') }}">Inicio</a>
         <a href="{{ url_for('create') }}">+ Nuevo Catequizado</a>
@@ -17,6 +17,16 @@
   </header>
 
   <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
 
