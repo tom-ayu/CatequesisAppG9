@@ -22,13 +22,7 @@ def create():
         id_bautismo = request.form['id_bautismo']
 
         conn = get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute("SELECT 1 FROM CatequesisData.Bautismo WHERE IdBautismo = ?", (id_bautismo,))
-        if cursor.fetchone() is None:
-            conn.close()
-            return render_template('create.html', error="El ID de Bautismo no existe. Ingréselo correctamente.")
-        
+        cursor = conn.cursor()        
         cursor.execute("""
             INSERT INTO CatequesisData.Catequizado (Nombre, Apellido, Telefono, FechaNacimiento, IdBautismo)
             VALUES (?, ?, ?, ?, ?)
