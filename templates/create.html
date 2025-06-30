@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Nuevo Catequizado{% endblock %}
+{% block title %}Nuevo Catequizando{% endblock %}
 {% block content %}
-<h2>Registrar Nuevo Catequizado</h2>
+<h2>Registrar Nuevo Catequizando</h2>
 
 <form method="POST" class="form">
   <label for="nombre">Nombre:</label>
@@ -10,22 +10,14 @@
   <label for="apellido">Apellido:</label>
   <input type="text" id="apellido" name="apellido" required>
 
-  <label for="telefono">Teléfono:</label>
-  <input type="text" id="telefono" name="telefono" maxlength="10" required>
+  <label for="dob">Fecha de Nacimiento:</label>
+  <input type="date" id="dob" name="dob" required>
 
-  <label for="fecha">Fecha de Nacimiento:</label>
-  <input type="date" id="fecha" name="fecha" required>
+  <label for="fe_bautismo">
+    <input type="checkbox" id="fe_bautismo" name="fe_bautismo">
+    ¿Tiene fe de bautismo?
+  </label>
 
-  <label for="id_bautismo">Seleccionar Bautismo:</label>
-  <select id="id_bautismo" name="id_bautismo" required>
-    <option value="">-- Seleccione --</option>
-    {% for b in bautismos %}
-      <option value="{{ b.IdBautismo }}">
-        {{ b.IdBautismo }} - {{ b.ParroquiaBautismo }}
-      </option>
-    {% endfor %}
-  </select>
-
-  <button type="submit" class="btn submit">Guardar</button>
+  <button type="submit" class="btn btn-success">Guardar</button>
 </form>
 {% endblock %}

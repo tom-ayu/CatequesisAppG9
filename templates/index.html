@@ -1,38 +1,39 @@
 {% extends "layout.html" %}
-{% block title %}Listado de Catequizados{% endblock %}
+{% block title %}Lista de Catequizandos{% endblock %}
 {% block content %}
-<h2>Listado de Catequizados</h2>
+<h2>Lista de Catequizandos</h2>
 
-{% if catequizados %}
-<table>
+<a href="{{ url_for('create') }}" class="btn btn-primary mb-3">+ Nuevo Catequizando</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+<table class="table table-bordered table-striped">
   <thead>
     <tr>
       <th>Nombre</th>
       <th>Apellido</th>
-      <th>Teléfono</th>
       <th>Fecha Nacimiento</th>
-      <th>ID Bautismo</th>
+      <th>¿Tiene fe de bautismo?</th>
       <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
-    {% for c in catequizados %}
+    {% for c in catequizandos %}
     <tr>
-      <td>{{ c.Nombre }}</td>
-      <td>{{ c.Apellido }}</td>
-      <td>{{ c.Telefono }}</td>
-      <td>{{ c.FechaNacimiento }}</td>
-      <td>{{ c.IdBautismo }}</td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.apellido }}</td>
+      <td>{{ c.dob }}</td>
+      <td>{{ 'Sí' if c.fe_bautismo else 'No' }}</td>
       <td>
-        <a class="btn edit" href="{{ url_for('edit', id=c.IdCatequizado) }}">Editar</a>
-        <a class="btn delete" href="{{ url_for('delete', id=c.IdCatequizado) }}" onclick="return confirm('¿Eliminar este catequizado?')">Eliminar</a>
+        <a href="{{ url_for('edit', id=c._id) }}" class="btn btn-warning btn-sm">Editar</a>
+        <a href="{{ url_for('delete', id=c._id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-{% else %}
-  <p>No hay catequizados registrados aún.</p>
-{% endif %}
-
 {% endblock %}

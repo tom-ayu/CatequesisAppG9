@@ -5,28 +5,19 @@
 
 <form method="POST" class="form">
   <label for="nombre">Nombre:</label>
-  <input type="text" id="nombre" name="nombre" value="{{ catequizado.Nombre }}" required>
+  <input type="text" id="nombre" name="nombre" value="{{ catequizado.nombre }}" required>
 
   <label for="apellido">Apellido:</label>
-  <input type="text" id="apellido" name="apellido" value="{{ catequizado.Apellido }}" required>
+  <input type="text" id="apellido" name="apellido" value="{{ catequizado.apellido }}" required>
 
-  <label for="telefono">Teléfono:</label>
-  <input type="text" id="telefono" name="telefono" maxlength="10" value="{{ catequizado.Telefono }}" required>
+  <label for="dob">Fecha de Nacimiento:</label>
+  <input type="date" id="dob" name="dob" value="{{ catequizado.dob }}" required>
 
-  <label for="fecha">Fecha de Nacimiento:</label>
-  <input type="date" id="fecha" name="fecha" value="{{ catequizado.FechaNacimiento }}" required>
+  <label for="fe_bautismo">
+    <input type="checkbox" id="fe_bautismo" name="fe_bautismo" {% if catequizado.fe_bautismo %}checked{% endif %}>
+    ¿Tiene fe de bautismo?
+  </label>
 
-  <label for="id_bautismo">Seleccionar Bautismo:</label>
-  <select id="id_bautismo" name="id_bautismo" required>
-    <option value="">-- Seleccione --</option>
-    {% for b in bautismos %}
-      <option value="{{ b.IdBautismo }}"
-        {% if catequizado.IdBautismo == b.IdBautismo %}selected{% endif %}>
-        {{ b.IdBautismo }} - {{ b.ParroquiaBautismo }}
-      </option>
-    {% endfor %}
-  </select>
-
-  <button type="submit" class="btn submit">Actualizar</button>
+  <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
 {% endblock %}
