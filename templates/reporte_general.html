@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Reporte General MongoDB{% endblock %}
+
+{% block content %}
+<h2>Reporte General de MongoDB</h2>
+
+{% for coleccion, documentos in datos.items() %}
+  <h3>Colección: {{ coleccion }}</h3>
+
+  {% if documentos %}
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            {% for key in documentos[0].keys() %}
+              <th>{{ key }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in documentos %}
+            <tr>
+              {% for value in doc.values() %}
+                <td>
+                  {% if value is string or value is number %}
+                    {{ value }}
+                  {% elif value is iterable and value is not string %}
+                    <ul>
+                      {% for item in value %}
+                        {% if item is mapping %}
+                          <li>
+                            {% for k, v in item.items() %}
+                              <strong>{{ k }}:</strong> {{ v }}<br>
+                            {% endfor %}
+                          </li>
+                        {% else %}
+                          <li>{{ item }}</li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  {% elif value is mapping %}
+                    <ul>
+                      {% for k, v in value.items() %}
+                        <li><strong>{{ k }}:</strong> {{ v }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    {{ value }}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p><em>No hay documentos.</em></p>
+  {% endif %}
+
+  <hr>
+{% endfor %}
+{% endblock %}
