@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from connectionmongo import get_mongo_connection
 from connectiondb import get_connection
 import pyodbc
-
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_123'
 
@@ -113,3 +113,28 @@ def delete(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# Reportes
+@app.route('/reporte-general')
+def reporte_general():
+    try:
+        db = get_mongo_connection()
+        reporte = {}
+
+        # Obtener todas las colecciones
+        colecciones = db.list_collection_names()
+
+        for nombre in colecciones:
+            documentos = list(db[nombre].find())
+            for doc in documentos:
+                if "_id" in doc and not isinstance(doc["_id"], str):
+                    doc["_id"] = str(doc["_id"])  # Para evitar errores en la plantilla
+            reporte[nombre] = documentos
+
+        return render_template('reporte_general.html', reporte=reporte)
+
+    except Exception as e:
+        flash(f"Error al generar reporte general: {e}", "danger")
+        return render_template('reporte_general.html', reporte={})
+    
+    
