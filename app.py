@@ -20,13 +20,22 @@ def index():
 def create():
     if request.method == 'POST':
         try:
+            db = get_mongo_connection()
+
+            last = db.catequizandos.find_one({"_id": {"$type": "int"}}, sort=[("_id", -1)])
+            next_id = last["_id"] + 1 if last else 1
+
             nuevo = {
+                "_id": next_id,
                 "nombre": request.form['nombre'],
                 "apellido": request.form['apellido'],
                 "dob": request.form['dob'],
-                "fe_bautismo": True if request.form.get('fe_bautismo') == 'on' else False
+                "fe_bautismo": True if request.form.get('fe_bautismo') == 'on' else False,
+                "tutores": [],
+                "sacramentos": None,
+                "certificados": None
             }
-            db = get_mongo_connection()
+
             db.catequizandos.insert_one(nuevo)
             flash("Catequizando creado exitosamente", "success")
             return redirect(url_for('index'))
