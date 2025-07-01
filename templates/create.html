@@ -3,10 +3,7 @@
 {% block content %}
 <h2>Registrar Catequizando</h2>
 
-<form method="POST">
-  <label>ID:</label>
-  <input type="number" name="Id" required>
-
+<form method="POST" class="form">
   <label>Nombre:</label>
   <input type="text" name="Nombre" required>
 
@@ -17,13 +14,13 @@
   <input type="date" name="FechaNacimiento" required>
 
   <label>¿Está Bautizado?</label>
-  <select name="FeBautismo">
+  <select name="FeBautismo" required>
     <option value="1">Sí</option>
     <option value="0">No</option>
   </select>
 
-  <button type="submit">Guardar</button>
+  <button type="submit" class="btn submit">Guardar</button>
 </form>
 
-<a href="{{ url_for('index') }}">Volver al listado</a>
+<a href="{{ url_for('index') }}" class="btn">Volver al listado</a>
 {% endblock %}

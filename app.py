@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from connectionmongo import get_mongo_connection
 from connectiondb import get_connection
 import pyodbc
+
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_123'
 
@@ -29,16 +30,23 @@ def index():
 def create_catequizando():
     if request.method == 'POST':
         data = request.form
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "EXEC sp_CreateCatequizando ?, ?, ?, ?, ?",
-            data['Id'], data['Nombre'], data['Apellido'],
-            data['FechaNacimiento'], int(data['FeBautismo'])
-        )
-        conn.commit()
-        conn.close()
-        return redirect(url_for('read_catequizandos'))
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "EXEC sp_CreateCatequizando ?, ?, ?, ?",
+                data['Nombre'],
+                data['Apellido'],
+                data['FechaNacimiento'],
+                int(data['FeBautismo'])
+            )
+            conn.commit()
+            conn.close()
+            flash("Catequizando registrado con éxito", "success")
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f"Error al registrar: {e}", "error")
+            return redirect(url_for('create_catequizando'))
     return render_template('create.html')
 
 
@@ -57,7 +65,7 @@ def update_catequizando(id):
         )
         conn.commit()
         conn.close()
-        return redirect(url_for('read_catequizandos'))
+        return redirect(url_for('index'))
 
     cursor.execute("EXEC sp_ReadCatequizandoPorId ?", id)
     row = cursor.fetchone()
@@ -82,7 +90,7 @@ def delete_catequizando(id):
     cursor.execute("EXEC sp_DeleteCatequizando ?", id)
     conn.commit()
     conn.close()
-    return redirect(url_for('read_catequizandos'))
+    return redirect(url_for('index'))
 
 ####### REPORTES (MONGODB) #######
 @app.route('/reporte-general')
@@ -91,12 +99,10 @@ def reporte_general():
         db = get_mongo_connection()
         datos = {}
 
-        # Recorre todas las colecciones y guarda sus documentos
         for nombre_coleccion in db.list_collection_names():
             coleccion = db[nombre_coleccion]
             documentos = list(coleccion.find())
             
-            # Convertir _id (ObjectId) a string para evitar errores en Jinja2
             for doc in documentos:
                 doc['_id'] = str(doc['_id'])
             datos[nombre_coleccion] = documentos
