@@ -1,0 +1,265 @@
+{% extends "layout.html" %}
+{% block title %}Confirmandos - Reporte Vicaría{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Reporte de Confirmandos para la Vicaría</h2>
+        <a href="{{ url_for('validaciones_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    {% if resultados %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Información:</strong> Se encontraron {{ resultados|length }} confirmandos registrados en el sistema.
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Lista de Confirmandos</h5>
+                <small class="text-muted">Catequizandos que han recibido el sacramento de la Confirmación (ID: 3)</small>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Completo</th>
+                                <th>Fecha de Confirmación</th>
+                                <th>Padrino/Madrina</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resultado in resultados %}
+                            <tr>
+                                <td>{{ resultado._id }}</td>
+                                <td>
+                                    <strong>{{ resultado.nombre or 'N/A' }}</strong> {{ resultado.apellido or '' }}
+                                </td>
+                                <td>
+                                    {% if resultado.fechaConfirmacion %}
+                                        <span class="badge bg-success">
+                                            {{ resultado.fechaConfirmacion }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Fecha no registrada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if resultado.padrino %}
+                                        <i class="fas fa-user"></i> {{ resultado.padrino }}
+                                    {% else %}
+                                        <span class="text-muted">Padrino no registrado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-certificate"></i> Confirmado
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas del reporte -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Total Confirmandos</h5>
+                        <h2 class="display-4 text-primary">{{ resultados|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Con Fecha Registrada</h5>
+                        <h2 class="display-4 text-success">
+                            {% set con_fecha = resultados | selectattr('fechaConfirmacion') | list | length %}
+                            {{ con_fecha }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Con Padrino Registrado</h5>
+                        <h2 class="display-4 text-info">
+                            {% set con_padrino = resultados | selectattr('padrino') | list | length %}
+                            {{ con_padrino }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Datos Completos</h5>
+                        <h2 class="display-4 text-warning">
+                            {% set completos = 0 %}
+                            {% for resultado in resultados %}
+                                {% if resultado.fechaConfirmacion and resultado.padrino %}
+                                    {% set completos = completos + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ completos }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen por años (si hay fechas) -->
+        {% set fechas_disponibles = resultados | selectattr('fechaConfirmacion') | list %}
+        {% if fechas_disponibles %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Resumen por Período</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Confirmaciones por Año:</h6>
+                        <div id="resumenAnual"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Últimas Confirmaciones:</h6>
+                        <div class="list-group" style="max-height: 200px; overflow-y: auto;">
+                            {% for resultado in resultados[:10] %}
+                                {% if resultado.fechaConfirmacion %}
+                                <div class="list-group-item">
+                                    <strong>{{ resultado.nombre }} {{ resultado.apellido }}</strong><br>
+                                    <small class="text-muted">{{ resultado.fechaConfirmacion }}</small>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Botones de acción -->
+        <div class="mt-4">
+            <button class="btn btn-success me-2" onclick="exportarTabla()">
+                <i class="fas fa-download"></i> Exportar a CSV
+            </button>
+            <button class="btn btn-info me-2" onclick="imprimirReporte()">
+                <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+            <button class="btn btn-primary" onclick="generarReporteVicaría()">
+                <i class="fas fa-file-pdf"></i> Reporte para Vicaría
+            </button>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Sin registros:</strong> No se encontraron confirmandos en el sistema.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function exportarTabla() {
+    const tabla = document.querySelector('table');
+    if (!tabla) return;
+    
+    let csv = [];
+    const filas = tabla.querySelectorAll('tr');
+    
+    for (let i = 0; i < filas.length; i++) {
+        const fila = [];
+        const cols = filas[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            let texto = cols[j].innerText.replace(/"/g, '""');
+            fila.push('"' + texto + '"');
+        }
+        
+        csv.push(fila.join(','));
+    }
+    
+    const csvString = csv.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'confirmandos_vicaria.csv');
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function imprimirReporte() {
+    window.print();
+}
+
+function generarReporteVicaría() {
+    // Esta función podría expandirse para generar un PDF específico
+    alert('Funcionalidad de reporte PDF en desarrollo. Por ahora use "Exportar a CSV".');
+}
+
+// Procesar resumen anual si hay fechas
+document.addEventListener('DOMContentLoaded', function() {
+    const resumenDiv = document.getElementById('resumenAnual');
+    if (resumenDiv) {
+        // Aquí se podría agregar lógica para agrupar por año
+        // Por simplicidad, mostraremos un mensaje
+        resumenDiv.innerHTML = '<p class="text-muted">Resumen anual disponible con más datos de fecha.</p>';
+    }
+});
+</script>
+
+<style>
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.badge {
+    margin: 2px;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.display-4 {
+    font-weight: bold;
+}
+
+.list-group-item {
+    border: 1px solid rgba(0,0,0,.125);
+    padding: 0.75rem 1.25rem;
+}
+
+@media print {
+    .btn, .alert {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}
+
+.me-2 {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}

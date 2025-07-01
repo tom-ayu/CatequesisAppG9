@@ -4,15 +4,36 @@
   <meta charset="UTF-8">
   <title>{% block title %}Catequesis{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <!-- FontAwesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <header>
     <div class="container">
       <h1>Sistema Catequesis G9 - BDD2</h1>
       <nav>
-        <a href="{{ url_for('index') }}">Inicio</a>
-        <a href="{{ url_for('create_catequizando') }}">+ Nuevo Catequizando</a>
-        <a href="{{ url_for('reporte_general') }}">Reporte General</a>
+        <a href="{{ url_for('index') }}">
+          <i class="fas fa-home"></i> Inicio
+        </a>
+        <a href="{{ url_for('create_catequizando') }}">
+          <i class="fas fa-user-plus"></i> + Nuevo Catequizando
+        </a>
+        
+        <!-- Dropdown de Reportes -->
+        <div class="dropdown">
+          <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
+            <i class="fas fa-chart-bar"></i> Reportes <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-menu" id="reportesDropdown">
+            <a class="dropdown-item" href="{{ url_for('reporte_general') }}">
+              <i class="fas fa-database"></i> Reporte General
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{{ url_for('validaciones_index') }}">
+              <i class="fas fa-cogs"></i> Consultas Específicas
+            </a>
+          </div>
+        </div>
       </nav>
     </div>
   </header>
@@ -20,11 +41,21 @@
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul class="flashes">
+        <div class="flashes">
           {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }}">
+              {% if category == 'error' %}
+                <i class="fas fa-exclamation-circle"></i>
+              {% elif category == 'success' %}
+                <i class="fas fa-check-circle"></i>
+              {% else %}
+                <i class="fas fa-info-circle"></i>
+              {% endif %}
+              {{ message }}
+              <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+            </div>
           {% endfor %}
-        </ul>
+        </div>
       {% endif %}
     {% endwith %}
 
@@ -34,5 +65,23 @@
   <footer>
     <p>&copy; 2025 Plataforma Catequesis</p>
   </footer>
+
+  <script>
+    function toggleDropdown(event) {
+      event.preventDefault();
+      const dropdown = document.getElementById('reportesDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('reportesDropdown');
+      const toggle = event.target.closest('.dropdown-toggle');
+      
+      if (!toggle) {
+        dropdown.classList.remove('show');
+      }
+    });
+  </script>
 </body>
 </html>

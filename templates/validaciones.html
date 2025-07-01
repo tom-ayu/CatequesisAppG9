@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block title %}Consultas Específicas del Sistema{% endblock %}
+
+{% block content %}
+<div>
+    <h2>Consultas Específicas del Sistema</h2>
+    <p>Ejecuta consultas avanzadas especializadas en la base de datos MongoDB.</p>
+
+    <!-- Sección de Consultas -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 style="color: black;">Consultas Avanzadas</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Catequizandos por Nivel</h5>
+                            <p class="card-text">Listado de catequizandos organizados por nivel de catequesis y parroquia.</p>
+                            <a href="{{ url_for('consulta_catequizandos_nivel_parroquia') }}" class="btn btn-info">
+                                <i class="fas fa-users"></i> Ver Consulta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Sacramentos Pendientes</h5>
+                            <p class="card-text">Reporte de niños con sacramentos pendientes o incompletos.</p>
+                            <a href="{{ url_for('consulta_sacramentos_pendientes') }}" class="btn btn-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Ver Consulta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Confirmandos - Vicaría</h5>
+                            <p class="card-text">Reporte especial para la Vicaría con datos de confirmandos.</p>
+                            <a href="{{ url_for('consulta_confirmandos_vicaria') }}" class="btn btn-success">
+                                <i class="fas fa-certificate"></i> Ver Consulta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.btn {
+    border-radius: 0.375rem;
+}
+
+.fas {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}

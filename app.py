@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from connectionmongo import get_mongo_connection
 from connectiondb import get_connection
 import pyodbc
+from bson import ObjectId
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta_123'
@@ -48,7 +50,6 @@ def create_catequizando():
             flash(f"Error al registrar: {e}", "error")
             return redirect(url_for('create_catequizando'))
     return render_template('create.html')
-
 
 ####### EDIT (SQL) #######
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -111,6 +112,162 @@ def reporte_general():
     except Exception as e:
         flash(f"Error al obtener el reporte general: {e}", "danger")
         return render_template('reporte_general.html', datos={})
+
+####### NUEVOS ENDPOINTS PARA VALIDACIONES E ÍNDICES #######
+
+# Página principal de consultas específicas
+@app.route('/validaciones')
+def validaciones_index():
+    return render_template('validaciones.html')
+
+# Consulta 1: Listado de catequizandos por nivel y parroquia
+@app.route('/consulta-catequizandos-nivel-parroquia')
+def consulta_catequizandos_nivel_parroquia():
+    try:
+        db = get_mongo_connection()
+        
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "grupoCatequesis",
+                    "localField": "_id",
+                    "foreignField": "inscripciones.catequizando_id",
+                    "as": "grupo"
+                }
+            },
+            {"$unwind": "$grupo"},
+            {
+                "$lookup": {
+                    "from": "nivelCatecismo",
+                    "localField": "grupo.nivelCatequesis_id",
+                    "foreignField": "_id",
+                    "as": "nivel"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "sacramentos",
+                    "localField": "sacramentos.sacramento_id",
+                    "foreignField": "_id",
+                    "as": "sacInfo"
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "parroquias",
+                    "localField": "sacramentos.parroquia_id",
+                    "foreignField": "_id",
+                    "as": "parroquia"
+                }
+            },
+            {
+                "$project": {
+                    "nombre": 1,
+                    "apellido": 1,
+                    "nivel": "$nivel.nombre",
+                    "parroquia": "$parroquia.direccion.nombreParroquia"
+                }
+            }
+        ]
+        
+        resultados = list(db.catequizandos.aggregate(pipeline))
+        
+        # Convertir ObjectId a string
+        for resultado in resultados:
+            resultado['_id'] = str(resultado['_id'])
+        
+        return render_template('consulta_catequizandos_nivel.html', resultados=resultados)
+    except Exception as e:
+        flash(f"Error en consulta: {e}", "error")
+        return render_template('consulta_catequizandos_nivel.html', resultados=[])
+
+# Consulta 2: Sacramentos pendientes
+@app.route('/consulta-sacramentos-pendientes')
+def consulta_sacramentos_pendientes():
+    try:
+        db = get_mongo_connection()
+        
+        query = {
+            "$or": [
+                {"sacramentos": {"$exists": False}},
+                {
+                    "$expr": {
+                        "$lt": [
+                            {"$size": {"$ifNull": ["$sacramentos", []]}},
+                            3
+                        ]
+                    }
+                }
+            ]
+        }
+        
+        projection = {
+            "nombre": 1,
+            "apellido": 1,
+            "sacramentos": 1
+        }
+        
+        resultados = list(db.catequizandos.find(query, projection))
+        
+        # Convertir ObjectId a string
+        for resultado in resultados:
+            resultado['_id'] = str(resultado['_id'])
+        
+        return render_template('consulta_sacramentos_pendientes.html', resultados=resultados)
+    except Exception as e:
+        flash(f"Error en consulta: {e}", "error")
+        return render_template('consulta_sacramentos_pendientes.html', resultados=[])
+
+# Consulta 3: Reporte de confirmandos para la Vicaría
+@app.route('/consulta-confirmandos-vicaria')
+def consulta_confirmandos_vicaria():
+    try:
+        db = get_mongo_connection()
+        
+        pipeline = [
+            {
+                "$match": {
+                    "sacramentos": {
+                        "$elemMatch": {
+                            "sacramento_id": 3
+                        }
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "nombre": 1,
+                    "apellido": 1,
+                    "sacramentos": {
+                        "$filter": {
+                            "input": "$sacramentos",
+                            "as": "sac",
+                            "cond": {"$eq": ["$$sac.sacramento_id", 3]}
+                        }
+                    }
+                }
+            },
+            {"$unwind": "$sacramentos"},
+            {
+                "$project": {
+                    "nombre": 1,
+                    "apellido": 1,
+                    "fechaConfirmacion": "$sacramentos.FechaEmision",
+                    "padrino": "$sacramentos.padrino"
+                }
+            }
+        ]
+        
+        resultados = list(db.catequizandos.aggregate(pipeline))
+        
+        # Convertir ObjectId a string
+        for resultado in resultados:
+            resultado['_id'] = str(resultado['_id'])
+        
+        return render_template('consulta_confirmandos_vicaria.html', resultados=resultados)
+    except Exception as e:
+        flash(f"Error en consulta: {e}", "error")
+        return render_template('consulta_confirmandos_vicaria.html', resultados=[])
 
 if __name__ == '__main__':
     app.run(debug=True)
