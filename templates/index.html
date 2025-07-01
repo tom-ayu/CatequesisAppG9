@@ -1,38 +1,39 @@
 {% extends "layout.html" %}
-{% block title %}Listado de Catequizados{% endblock %}
+{% block title %}Listado de Catequizandos{% endblock %}
 {% block content %}
-<h2>Listado de Catequizados</h2>
 
-{% if catequizados %}
-<table>
+<h2>Listado de Catequizandos</h2>
+
+{% if catequizandos %}
+<table border="1" cellpadding="5">
   <thead>
     <tr>
+      <th>ID</th>
       <th>Nombre</th>
       <th>Apellido</th>
-      <th>Teléfono</th>
-      <th>Fecha Nacimiento</th>
-      <th>ID Bautismo</th>
+      <th>Fecha de Nacimiento</th>
+      <th>Bautizado</th>
       <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
-    {% for c in catequizados %}
+    {% for c in catequizandos %}
     <tr>
+      <td>{{ c.Id }}</td>
       <td>{{ c.Nombre }}</td>
       <td>{{ c.Apellido }}</td>
-      <td>{{ c.Telefono }}</td>
       <td>{{ c.FechaNacimiento }}</td>
-      <td>{{ c.IdBautismo }}</td>
+      <td>{{ "Sí" if c.FeBautismo else "No" }}</td>
       <td>
-        <a class="btn edit" href="{{ url_for('edit', id=c.IdCatequizado) }}">Editar</a>
-        <a class="btn delete" href="{{ url_for('delete', id=c.IdCatequizado) }}" onclick="return confirm('¿Eliminar este catequizado?')">Eliminar</a>
+        <a class="btn edit" href="{{ url_for('update_catequizando', id=c.Id) }}">Editar</a>
+        <a class="btn delete" href="{{ url_for('delete_catequizando', id=c.Id) }}" onclick="return confirm('¿Eliminar este catequizado?')">Eliminar</a>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 {% else %}
-  <p>No hay catequizados registrados aún.</p>
+  <p>No hay catequizandos registrados aún.</p>
 {% endif %}
 
 {% endblock %}

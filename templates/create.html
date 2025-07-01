@@ -1,31 +1,29 @@
 {% extends "layout.html" %}
-{% block title %}Nuevo Catequizado{% endblock %}
+{% block title %}Registrar Catequizando{% endblock %}
 {% block content %}
-<h2>Registrar Nuevo Catequizado</h2>
+<h2>Registrar Catequizando</h2>
 
-<form method="POST" class="form">
-  <label for="nombre">Nombre:</label>
-  <input type="text" id="nombre" name="nombre" required>
+<form method="POST">
+  <label>ID:</label>
+  <input type="number" name="Id" required>
 
-  <label for="apellido">Apellido:</label>
-  <input type="text" id="apellido" name="apellido" required>
+  <label>Nombre:</label>
+  <input type="text" name="Nombre" required>
 
-  <label for="telefono">Teléfono:</label>
-  <input type="text" id="telefono" name="telefono" maxlength="10" required>
+  <label>Apellido:</label>
+  <input type="text" name="Apellido" required>
 
-  <label for="fecha">Fecha de Nacimiento:</label>
-  <input type="date" id="fecha" name="fecha" required>
+  <label>Fecha de Nacimiento:</label>
+  <input type="date" name="FechaNacimiento" required>
 
-  <label for="id_bautismo">Seleccionar Bautismo:</label>
-  <select id="id_bautismo" name="id_bautismo" required>
-    <option value="">-- Seleccione --</option>
-    {% for b in bautismos %}
-      <option value="{{ b.IdBautismo }}">
-        {{ b.IdBautismo }} - {{ b.ParroquiaBautismo }}
-      </option>
-    {% endfor %}
+  <label>¿Está Bautizado?</label>
+  <select name="FeBautismo">
+    <option value="1">Sí</option>
+    <option value="0">No</option>
   </select>
 
-  <button type="submit" class="btn submit">Guardar</button>
+  <button type="submit">Guardar</button>
 </form>
+
+<a href="{{ url_for('index') }}">Volver al listado</a>
 {% endblock %}

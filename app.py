@@ -8,100 +8,81 @@ app.secret_key = 'clave_secreta_123'
 ####### READ (SQL) #######
 @app.route('/')
 def index():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("EXEC CatequesisData.ObtenerCatequizados")
-        catequizados = cursor.fetchall()
-        conn.close()
-        return render_template('index.html', catequizados=catequizados)
-    except pyodbc.Error as e:
-        flash(f'Error al obtener los catequizados: {e.args[1]}', 'error')
-        return render_template('index.html', catequizados=[])
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("EXEC sp_ReadCatequizando")
+    rows = cursor.fetchall()
+    conn.close()
+
+    catequizandos = [{
+        'Id': row[0],
+        'Nombre': row[1],
+        'Apellido': row[2],
+        'FechaNacimiento': row[3],
+        'FeBautismo': bool(row[4])
+    } for row in rows]
+
+    return render_template('index.html', catequizandos=catequizandos)
 
 ####### CREATE (SQL) #######
 @app.route('/create', methods=['GET', 'POST'])
-def create():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT IdBautismo, ParroquiaBautismo FROM CatequesisData.Bautismo")
-    bautismos = cursor.fetchall()
-
+def create_catequizando():
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        apellido = request.form['apellido']
-        telefono = request.form['telefono']
-        fecha_nac = request.form['fecha']
-        id_bautismo = request.form['id_bautismo']
+        data = request.form
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "EXEC sp_CreateCatequizando ?, ?, ?, ?, ?",
+            data['Id'], data['Nombre'], data['Apellido'],
+            data['FechaNacimiento'], int(data['FeBautismo'])
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('read_catequizandos'))
+    return render_template('create.html')
 
-        try:
-            cursor.execute("EXEC CatequesisData.CrearCatequizado ?,?,?,?,?",
-                           (nombre, apellido, telefono, fecha_nac, id_bautismo))
-            conn.commit()
-            flash('Catequizado creado exitosamente.', 'success')
-            return redirect(url_for('index'))
-        except pyodbc.Error as e:
-            flash(f'Error al crear catequizado: {e.args[1]}', 'error')
-
-    conn.close()
-    return render_template('create.html', bautismos=bautismos)
 
 ####### EDIT (SQL) #######
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
-def edit(id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
+def update_catequizando(id):
+    conn = get_connection()
+    cursor = conn.cursor()
 
-        cursor.execute("SELECT IdBautismo, ParroquiaBautismo FROM CatequesisData.Bautismo")
-        bautismos = cursor.fetchall()
-
-        if request.method == 'POST':
-            nombre = request.form['nombre']
-            apellido = request.form['apellido']
-            telefono = request.form['telefono']
-            fecha_nac = request.form['fecha']
-            id_bautismo = request.form['id_bautismo']
-
-            try:
-                cursor.execute(
-                    "EXEC CatequesisData.ActualizarCatequizado ?, ?, ?, ?, ?, ?",
-                    (id, nombre, apellido, telefono, fecha_nac, id_bautismo)
-                )
-                conn.commit()
-                flash('Catequizado actualizado correctamente.', 'success')
-                return redirect(url_for('index'))
-            except pyodbc.Error as e:
-                flash(f'Error al actualizar: {e.args[1]}', 'error')
-
-        cursor.execute("SELECT * FROM CatequesisData.Catequizado WHERE IdCatequizado=?", (id,))
-        catequizado = cursor.fetchone()
-        conn.close()
-
-        if not catequizado:
-            flash('Catequizado no encontrado.', 'error')
-            return redirect(url_for('index'))
-
-        return render_template('edit.html', catequizado=catequizado, bautismos=bautismos)
-
-    except pyodbc.Error as e:
-        flash(f'Error general: {e.args[1]}', 'error')
-        return redirect(url_for('index'))
-
-####### DELETE (SQL) #######
-@app.route('/delete/<int:id>')
-def delete(id):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("EXEC CatequesisData.EliminarCatequizado ?", (id,))
+    if request.method == 'POST':
+        data = request.form
+        cursor.execute(
+            "EXEC sp_UpdateCatequizando ?, ?, ?, ?, ?",
+            id, data['Nombre'], data['Apellido'],
+            data['FechaNacimiento'], int(data['FeBautismo'])
+        )
         conn.commit()
         conn.close()
-        flash('Catequizado eliminado exitosamente.', 'success')
-    except pyodbc.Error as e:
-        flash(f'Error al eliminar: {e.args[1]}', 'error')
+        return redirect(url_for('read_catequizandos'))
 
-    return redirect(url_for('index'))
+    cursor.execute("EXEC sp_ReadCatequizandoPorId ?", id)
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        catequizando = {
+            'Id': row[0],
+            'Nombre': row[1],
+            'Apellido': row[2],
+            'FechaNacimiento': row[3],
+            'FeBautismo': bool(row[4])
+        }
+        return render_template('edit.html', catequizando=catequizando)
+    return 'No encontrado', 404
+
+####### DELETE (SQL) #######
+@app.route('/delete/<int:id>', methods=['GET'])
+def delete_catequizando(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("EXEC sp_DeleteCatequizando ?", id)
+    conn.commit()
+    conn.close()
+    return redirect(url_for('read_catequizandos'))
 
 ####### REPORTES (MONGODB) #######
 @app.route('/reporte-general')

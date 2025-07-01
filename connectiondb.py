@@ -6,5 +6,5 @@ def get_connection():
         "SERVER=localhost;"
         "DATABASE=CatequesisGrupo9;"
         "UID=LoginAdministrador;"
-        "PWD=APassword123"
+        "PWD=Administrador2025$!"
     )
