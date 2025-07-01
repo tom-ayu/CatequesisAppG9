@@ -1,10 +1,11 @@
 # Aplicación Catequesis G9
-Sistema de gestión para el registro y administración de catequizandos, desarrollado con **Python + Flask, SQL Server, HTML + CSS + JS**.
+Sistema de gestión para el registro y administración de catequizandos, además de las consultas principales del sistema de catequesis Desarrollado con **Python + Flask; HTML + CSS + JS; SQL Server y MongoDB**.
 
 ## Requisitos
 - Python última versión
 - pip (instalador de paquetes de Python)
-- MS SQL Server
+- MS SQL Server con BDD CatequesisGrupo9
+- Clúster MongoDB Atlas con BDD CatequesisG9
 - ODBC Driver 17 para SQL Server
 
 ## Instalación
