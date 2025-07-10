@@ -1,15 +1,14 @@
 # Aplicación Catequesis G9
-Sistema de gestión para el registro y administración de catequizandos, desarrollado con **Python + Flask, SQL Server, HTML + CSS + JS**.
+Sistema de gestión para el registro y administración de catequizandos, desarrollado con **Python + Flask, MongoDB, HTML + CSS + JS**.
 
 ## Requisitos
 - Python última versión
 - pip (instalador de paquetes de Python)
-- MS SQL Server
-- ODBC Driver 17 para SQL Server
 
 ## Instalación
-### 1. Clonar el repositorio
+### 1. Clonar el repositorio y cambiar la rama
 git clone https://github.com/tu_usuario/catequesis-app.git
+git checkout mongodb
 
 ### 2. Crear el entorno virtual e instalar dependencias desde la terminal **(SOLO POR LA PRIMERA VEZ)**
 python ejecutable.py
