@@ -7,8 +7,8 @@ Sistema de gestión para el registro y administración de catequizandos, desarro
 
 ## Instalación
 ### 1. Clonar el repositorio y cambiar la rama
-git clone https://github.com/tu_usuario/catequesis-app.git
-git checkout mongodb
+- git clone https://github.com/tu_usuario/catequesis-app.git
+- git checkout mongodb
 
 ### 2. Crear el entorno virtual e instalar dependencias desde la terminal **(SOLO POR LA PRIMERA VEZ)**
 python ejecutable.py
